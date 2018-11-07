@@ -126,8 +126,8 @@ def FFTAnalysis(accelData,Fs):
 #Load in the test data and run the functions to produce the output plots
 ###############################################################################
 
-# novicepath = 'novice_arduino.csv'     #names of csv files
-# expertpath = 'expert_arduino.csv'
+novicepath = 'novice_arduino.csv'     #names of csv files
+expertpath = 'expert_arduino.csv'
 
 novice = np.loadtxt(novicepath, delimiter=',', unpack=False) #load data
 expert = np.loadtxt(expertpath, delimiter=',', unpack=False)
