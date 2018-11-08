@@ -125,9 +125,10 @@ def FFTAnalysis(accelData,Fs):
 #FUNCTION - Cummulative Energy Spent from Acceleration
 ###############################################################################
 def energy_sum(accelMag):
-	E = 0.5 *  accelMag ** 2
-	CE = np.cumsum(E)
-return CE
+    E = 0.5 *  accelMag ** 2 #kinetic energy per unit mass
+    CE = np.cumsum(E)        #cummulative energy
+    return CE,E
+###############################################################################
 
 
 ###############################################################################
@@ -156,8 +157,8 @@ dEG = deltas(EmagG)
 # sns.distplot(dNA, bins=100, kde=False, rug=True)
 
 # print(np.shape(NmagA[:,0]))
-NMAData = movingAvg((dNA[:,0]),1)
-EMAData = movingAvg((dEA[:,0]),1)
+NMAData = movingAvg((dNA[:,0]),45) #At 180 Hz smoothing using 45 is 4Hz
+EMAData = movingAvg((dEA[:,0]),45)
 
 # NMAData2 = movingAvg((NmagA[:,0]),1000)
 # NMAData3 = movingAvg((NmagA[:,0]),2000)
@@ -181,56 +182,77 @@ RmovesExpert = RangeMovements(EMAData)
 print('All novice moves', RmovesNovice, '\n')
 print('All expert moves', RmovesExpert, '\n')
 
-plt.figure(5)
-plt.bar([1,2,3,4,5,6,7,8],RmovesNovice)
+plt.figure(1)
+plt.subplot(321)
+bars = ('0.002','0.004','0.006','0.008','0.010','0.020','0.030','0.040')
+y_pos = np.arange(len(bars))
+plt.bar(y_pos, RmovesNovice)
+plt.xticks(y_pos, bars, color='black',rotation='vertical',fontsize=6)
+plt.yticks(color='black',fontsize=6)
+plt.title('Hand Movements Novice', fontsize=8)
+plt.ylabel('No. of Movements',fontsize=6)
+plt.xlabel('Accel Threshold (m/s^2)',fontsize=6)
+plt.tight_layout()
+plt.subplot(322)
+plt.bar(y_pos, RmovesExpert,color='orange')
+plt.xticks(y_pos, bars, color='black',rotation='vertical',fontsize=6)
+plt.yticks(color='black',fontsize=6)
+plt.title('Hand Movements Expert', fontsize=8)
+plt.ylabel('No. of Movements',fontsize=6)
+plt.xlabel('Accel Threshold (m/s^2)',fontsize=6)
+plt.tight_layout()
 
 
+Ntf,Nyf,NN = FFTAnalysis(NmagA,180)
+Etf,Eyf,EN = FFTAnalysis(EmagA,180)
+
+CNE,NE = energy_sum(NmagA)
+CEE,EE = energy_sum(EmagA)
+
+plt.subplot(323)
+plt.plot(Ntf, 2.0/NN * np.abs(Nyf[0:NN//2]),label='Novice')
+plt.plot(Etf, 2.0/EN * np.abs(Eyf[0:EN//2]),color='orange',label='Expert')
+plt.grid()
+plt.title('Single-Sided Amplitude Spectrum of y(t)',fontsize=8)
+plt.ylabel('|Y(f)|',fontsize=6)
+plt.xlabel('Frequency (Hz)',fontsize=6)
+plt.xticks(fontsize=6)
+plt.yticks(fontsize=6)
+plt.axis([0, 60,0,0.00015])
+plt.legend(loc='upper right',fontsize=6)
+plt.tight_layout()
 
 
-# Ntf,Nyf,NN = FFTAnalysis(NmagA,180)
-# Etf,Eyf,EN = FFTAnalysis(EmagA,180)
-# plt.figure(3)
-# plt.plot(Ntf, 2.0/NN * np.abs(Nyf[0:NN//2]),label='Novice')
-# plt.plot(Etf, 2.0/EN * np.abs(Eyf[0:EN//2]),label='Expert')
-# plt.grid()
-# plt.title('Single-Sided Amplitude Spectrum of y(t)')
-# plt.ylabel('|Y(f)|')
-# plt.xlabel('Frequency (Hz)')
-# # plt.axis([0, 20,0,0.00015])
-# plt.legend()
+plt.subplot(324)
+plt.plot(tN,NmagA[0:len(tN)],label='Novice')  #plot the acceleration vs time for the novice
+plt.plot(tE,EmagA[0:len(tE)],color='orange',label='Experts')  #plot the Expert data on top
+plt.ylabel('Acceleration g (m/s^2)',fontsize=6)
+plt.xlabel('Time (s)',fontsize=6)
+plt.title('Hand Acceleration Magnitude g (m/s^2)',fontsize=8)
+plt.xticks(fontsize=6)
+plt.yticks(fontsize=6)
+plt.legend(loc='upper right',fontsize=6)
+plt.tight_layout()
 
+plt.subplot(325)
+plt.plot(tN,NmagG[0:len(tN)],label='Novice')  #plot the acceleration vs time for the novice
+plt.plot(tE,EmagG[0:len(tE)],color='orange',label='Expert')  #plot the Expert data on top
+plt.ylabel('Ang Vel Mag (deg/s)',fontsize=6)
+plt.xlabel('Time (s)',fontsize=6)
+plt.title('Angular Velocity Magnitude deg/s',fontsize=8)
+plt.xticks(fontsize=6)
+plt.yticks(fontsize=6)
+plt.legend(loc='upper right',fontsize=6)
+plt.tight_layout()
 
-
-# widths = np.arange(np.shape(NmagA)[])
-# cwtmatr = signal.cwt(NmagA,signal.ricker,widths)
-# plt.figure(3)
-# plt.plot(cwtmatr,label='Novice')
-# plt.legend()
-
-# plt.figure(1)
-# plt.subplot(211)
-# plt.plot(tN,NmagA[0:len(tN)])  #plot the acceleration vs time for the novice
-# plt.plot(tE,EmagA[0:len(tE)])  #plot the Expert data on top
-# plt.ylabel('Acceleration g (m/s^2)')
-# # plt.xlabel('Time (s)')
-#
-# plt.subplot(212)
-# plt.plot(tN,NmagG[0:len(tN)])  #plot the acceleration vs time for the novice
-# plt.plot(tE,EmagG[0:len(tE)])  #plot the Expert data on top
-# plt.ylabel('Ang Vel Mag (deg/s)')
-# plt.xlabel('Time (s)')
-#
-# plt.figure(2)
-# plt.subplot(211)
-# plt.plot(tN[0:-1],dNA)  #plot the acceleration vs time for the novice
-# plt.plot(tE[0:-1],dEA)  #plot the Expert data on top
-# plt.ylabel('delta Acceleration g (m/s^2)')
-# # plt.xlabel('Time (s)')
-#
-# plt.subplot(212)
-# plt.plot(tN[0:-1],dNG)  #plot the acceleration vs time for the novice
-# plt.plot(tE[0:-1],dEG)  #plot the Expert data on top
-# plt.ylabel('delta Ang Vel Mag (deg/s)')
-# plt.xlabel('Time (s)')
+plt.subplot(326)
+plt.plot(tN,CNE,label='Novice')
+plt.plot(tE,CEE,color='orange',label='Expert')
+plt.title('Cummulative Kinetic Energy per Unit Mass (J/kg)',fontsize=8)
+plt.ylabel('Total Energy (J/kg)',fontsize=6)
+plt.xlabel('Time (s)',fontsize=6)
+plt.xticks(fontsize=6)
+plt.yticks(fontsize=6)
+plt.legend(loc='upper right',fontsize=6)
 
 plt.show()
