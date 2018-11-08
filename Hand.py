@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import axes3d
 from scipy.fftpack import fft, ifft
+from scipy.integrate import quad
 from scipy import signal
 import csv
 import numpy as np
@@ -121,6 +122,14 @@ def FFTAnalysis(accelData,Fs):
 
 	return tf,yf,N
 
+#FUNCTION - Cummulative Energy Spent from Acceleration
+###############################################################################
+def energy_sum(accelMag):
+	E = 0.5 *  accelMag ** 2
+	CE = np.cumsum(E)
+return CE
+
+
 ###############################################################################
 #    MAIN CODE
 #Load in the test data and run the functions to produce the output plots
@@ -143,8 +152,8 @@ dNG = deltas(NmagG)
 dEA = deltas(EmagA)
 dEG = deltas(EmagG)
 
-plt.figure(1)
-sns.distplot(dNA, bins=20, kde=False, rug=True)
+# plt.figure(1)
+# sns.distplot(dNA, bins=100, kde=False, rug=True)
 
 # print(np.shape(NmagA[:,0]))
 NMAData = movingAvg((dNA[:,0]),1)
@@ -154,10 +163,10 @@ EMAData = movingAvg((dEA[:,0]),1)
 # NMAData3 = movingAvg((NmagA[:,0]),2000)
 # NMAData4 = movingAvg((NmagA[:,0]),5000)
 #
-plt.figure(2)
-plt.plot(NmagA,label='Novice')
-plt.plot(EmagA,label='Expert')
-plt.legend()
+# plt.figure(2)
+# plt.plot(NmagA,label='Novice')
+# plt.plot(EmagA,label='Expert')
+# plt.legend()
 # plt.plot(NMAData2)
 # plt.plot(NMAData3)
 # plt.plot(NMAData4)
@@ -174,33 +183,23 @@ print('All expert moves', RmovesExpert, '\n')
 
 plt.figure(5)
 plt.bar([1,2,3,4,5,6,7,8],RmovesNovice)
-plt.bar([1,2,3,4,5,6,7,8],RmovesExpert)
-
-
-
-Ntf,Nyf,NN = FFTAnalysis(NmagA,180)
-Etf,Eyf,EN = FFTAnalysis(EmagA,180)
-plt.figure(3)
-plt.plot(Ntf, 2.0/NN * np.abs(Nyf[0:NN//2]),label='Novice')
-plt.plot(Etf, 2.0/EN * np.abs(Eyf[0:EN//2]),label='Expert')
-plt.grid()
-plt.title('Single-Sided Amplitude Spectrum of y(t)')
-plt.ylabel('|Y(f)|')
-plt.xlabel('Frequency (Hz)')
-# plt.axis([0, 20,0,0.00015])
-plt.legend()
 
 
 
 
-# sns.set(style="ticks")
-#
-# rs = np.random.RandomState(11)
-# x = rs.gamma(2, size=1000)
-# y = -.5 * x + rs.normal(size=1000)
-#
-# sns.jointplot(RmovesNovice, RmovesExpert, kind="hex", color="#4CB391")
-# sns.jointplot(x, y, kind="hex", color="#4CB391")
+# Ntf,Nyf,NN = FFTAnalysis(NmagA,180)
+# Etf,Eyf,EN = FFTAnalysis(EmagA,180)
+# plt.figure(3)
+# plt.plot(Ntf, 2.0/NN * np.abs(Nyf[0:NN//2]),label='Novice')
+# plt.plot(Etf, 2.0/EN * np.abs(Eyf[0:EN//2]),label='Expert')
+# plt.grid()
+# plt.title('Single-Sided Amplitude Spectrum of y(t)')
+# plt.ylabel('|Y(f)|')
+# plt.xlabel('Frequency (Hz)')
+# # plt.axis([0, 20,0,0.00015])
+# plt.legend()
+
+
 
 # widths = np.arange(np.shape(NmagA)[])
 # cwtmatr = signal.cwt(NmagA,signal.ricker,widths)
